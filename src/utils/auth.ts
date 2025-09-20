@@ -9,7 +9,7 @@ export async function signInWithGoogle(): Promise<AuthResult> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/`,
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
@@ -48,7 +48,7 @@ export async function signInWithGitHub(): Promise<AuthResult> {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
-        redirectTo: `${window.location.origin}/dashboard`,
+        redirectTo: `${window.location.origin}/`,
         scopes: 'read:user user:email',
       },
     });

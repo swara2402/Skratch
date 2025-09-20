@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { supabase } from "../supabaseClient";
+import { signInWithGoogle, signInWithGitHub } from "../utils/auth";
+import { AuthError } from "../types/supabase";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Separator } from "./ui/separator";
-import { X, Mail, Github, Zap } from "lucide-react";
+import { X, Mail, Github, Zap, Loader2 } from "lucide-react";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -23,6 +25,8 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "signu
     firstName: "",
     lastName: ""
   });
+  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -82,14 +86,34 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "signu
     }
   };
 
-  const handleSocialAuth = (provider: string) => {
-    // Simulate social auth success
-    console.log(`Social auth initiated for provider: ${provider}`);
-    setTimeout(() => {
-      console.log(`Social auth success for ${provider}, calling onAuthSuccess`);
-      onAuthSuccess();
-      onClose();
-    }, 1000);
+  const handleSocialAuth = async (provider: 'google' | 'github') => {
+    setOauthLoading(provider);
+    setOauthError(null);
+
+    try {
+      console.log(`OAuth initiated for provider: ${provider}`);
+
+      let result;
+      if (provider === 'google') {
+        result = await signInWithGoogle();
+      } else {
+        result = await signInWithGitHub();
+      }
+
+      if (result.success) {
+        console.log(`OAuth success for ${provider}, waiting for redirect`);
+        // The OAuth flow will redirect, so we don't need to call onAuthSuccess here
+        // The auth state change listener in App.tsx will handle the success
+      } else {
+        console.error(`OAuth error for ${provider}:`, result.error);
+        setOauthError(result.error?.message || 'An error occurred during sign-in');
+      }
+    } catch (error) {
+      console.error(`Unexpected error during ${provider} OAuth:`, error);
+      setOauthError('An unexpected error occurred during sign-in');
+    } finally {
+      setOauthLoading(null);
+    }
   };
 
   if (!isOpen) return null;
@@ -128,21 +152,36 @@ export function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = "signu
         <CardContent className="space-y-6">
           {/* Social Login */}
           <div className="space-y-3">
-            <Button 
-              variant="outline" 
+            {oauthError && (
+              <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                {oauthError}
+              </div>
+            )}
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => handleSocialAuth("google")}
+              disabled={oauthLoading !== null}
             >
-              <Mail className="h-4 w-4 mr-2" />
-              Continue with Google
+              {oauthLoading === 'google' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Mail className="h-4 w-4 mr-2" />
+              )}
+              {oauthLoading === 'google' ? 'Connecting to Google...' : 'Continue with Google'}
             </Button>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => handleSocialAuth("github")}
+              disabled={oauthLoading !== null}
             >
-              <Github className="h-4 w-4 mr-2" />
-              Continue with GitHub
+              {oauthLoading === 'github' ? (
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              ) : (
+                <Github className="h-4 w-4 mr-2" />
+              )}
+              {oauthLoading === 'github' ? 'Connecting to GitHub...' : 'Continue with GitHub'}
             </Button>
           </div>
           

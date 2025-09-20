@@ -20,3 +20,18 @@ export interface UserProfile {
   full_name?: string;
   avatar_url?: string;
 }
+
+// OAuth Provider types
+export type OAuthProvider = 'google' | 'github';
+
+// Auth error interface
+export interface AuthError {
+  message: string;
+  code?: string;
+}
+
+// Auth result interface
+export interface AuthResult {
+  success: boolean;
+  error?: AuthError;
+}

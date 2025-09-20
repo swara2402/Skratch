@@ -1,7 +1,7 @@
 
-  # Momentum AI Web Prototype
+  # Skratch
 
-  This is a code bundle for Momentum AI Web Prototype. The original project is available at https://www.figma.com/design/IG061JjfSJW7ffnPcaP6UX/Momentum-AI-Web-Prototype.
+  This is a code bundle for Skratch. The original project is available at https://www.figma.com/design/IG061JjfSJW7ffnPcaP6UX/Momentum-AI-Web-Prototype.
 
   ## Running the code
 
